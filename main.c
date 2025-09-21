@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
 
+typedef uint64_t u64;
 
 typedef enum Piece{
 	P_EMPTY = 0,
@@ -18,7 +20,36 @@ typedef struct Board{
 }Board;
 
 
+#define getBit(bb, index) ((bb)&(1<<(index)))
+
+//bit 0 in a bitboard represents a1, bit 1 b1, bit 2 c1, ect
+/*
+	8 9 ...
+	0 1 2 3 4 5 6 7
+*/
+
+bool BBGet(u64 bb, int x, int y){
+	return bb&((u64)1<<((y*8)+x));
+}
+
+void printBB(u64 bb){
+	printf("  a b c d e f g h\n");//header
+	for(int y = 7; y>=0; y--){
+		printf("%c", '1'+y);
+		for(int x = 0; x<8; x++){
+			if(BBGet(bb, x, y))
+				printf("\x1b[42;30m");//background color green, fg color black
+			else
+				printf("\x1b[47;30m");//background color white, fg color black
+
+			printf("  \x1b[0m");//"  " + color reset
+		}
+		printf("\n");
+	}
+}
+
 void printBoard(Board *board){
+	
 	char* pieceChars = " PNBRQKpnbrqk";
 	printf("  a b c d e f g h\n");//header
 	for(int y = 7; y>=0; y--){
@@ -41,6 +72,7 @@ void printBoard(Board *board){
 }
 
 int main(int argc, char* argv[]){
+	
 	Board board;
 	for(int y = 0; y<8; y++){
 		for(int x = 0; x<8; x++){
@@ -49,5 +81,10 @@ int main(int argc, char* argv[]){
 		}
 	}
 	printBoard(&board);
+	printBB(0xAAAAAAAAAAAAAAAA);
+	printBB(0xFF00FF00FF00FF00);
+	printBB(1);
+	printBB(((u64)1)<<5);
+	printBB(((u64)1)<<63);
 	return 0;
 }
