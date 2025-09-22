@@ -13,6 +13,6 @@ int main(int argc, char* argv[]){
 	char* fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 	Board board;
 	loadFEN(&board, fen);
-	printBoard(&board);
+	printBoardDebug(&board);
 	return 0;
 }

@@ -18,7 +18,7 @@ void printBB(u64 bb){
 	}
 }
 
-void printBoard(Board *board){
+void printBoard(Board *board, u64 highlighted){
 	char* pieceChars = "PNBRQKpnbrqk";
 	printf("  a b c d e f g h\n");//header
 	for(int y = 7; y>=0; y--){
@@ -28,6 +28,8 @@ void printBoard(Board *board){
 				printf("\x1b[42;30m");//background color green, fg color black
 			else
 				printf("\x1b[47;30m");//background color white, fg color black
+			if(BBGet(highlighted, x, y))
+				printf("\x1b[43;30m");
 
 			int piece = board->squares[x][y];
 			if(piece == P_EMPTY){
@@ -48,3 +50,14 @@ void printBoard(Board *board){
 	}
 }
 
+void printBoardDebug(Board *board){
+	printBoard(board, 0);
+	printf("bitboards\n");
+	printf("----white pieces----\n");
+	for(int i = 0; i<6; i++)
+		printBoard(board, board->whitePieces[i]);
+
+	printf("----black pieces----\n");
+	for(int i = 0; i<6; i++)
+		printBoard(board, board->blackPieces[i]);
+}
