@@ -36,10 +36,8 @@ void printBoard(Board *board, u64 highlighted){
 				printf("  \x1b[0m");
 				continue;
 			}
-			int index = piece&MP_PIECE;
-			if(index>=0 && index<6){
-				if(piece&MP_BLACK) index+=6;
-				printf("%c ", pieceChars[index]);
+			if(piece>=0 && piece<12){
+				printf("%c ", pieceChars[piece]);
 			}
 			else
 				printf("!?");
@@ -55,9 +53,9 @@ void printBoardDebug(Board *board){
 	printf("bitboards\n");
 	printf("----white pieces----\n");
 	for(int i = 0; i<6; i++)
-		printBoard(board, board->whitePieces[i]);
+		printBoard(board, board->bitboards[i]);
 
 	printf("----black pieces----\n");
-	for(int i = 0; i<6; i++)
-		printBoard(board, board->blackPieces[i]);
+	for(int i = 6; i<12; i++)
+		printBoard(board, board->bitboards[i]);
 }

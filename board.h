@@ -3,9 +3,8 @@
 
 typedef uint64_t u64;
 
-//bits 0-3 are the piece type, if bit 4 is set it is black
-//---cpppp
 
+//a black peice is a white peice +6
 typedef enum Piece{
 	P_EMPTY = -1, //for squarewise board only
 	P_PAWN,
@@ -16,14 +15,10 @@ typedef enum Piece{
 	P_KING
 }Piece;
 
-//peice masks
-#define MP_BLACK 0b00010000
-#define MP_PIECE 0b00001111 //ignore color
 
 typedef struct Board{
 	int squares[8][8];//x,y
-	u64 whitePieces[6];
-	u64 blackPieces[6];
+	u64 bitboards[12];
 }Board;
 
 //bit 0 in a bitboard represents a1, bit 1 b1, bit 2 c1, ect

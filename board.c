@@ -7,9 +7,8 @@ void loadFEN(Board *board, char* fen){
 	int index = 0;
 	int x = 0;
 	int y = 7;
-	for(int i = 0; i<6; i++){
-		board->whitePieces[i] = (u64)0;
-		board->blackPieces[i] = (u64)0;
+	for(int i = 0; i<12; i++){
+		board->bitboards[i] = (u64)0;
 	}
 	while(index<strlen(fen)){
 		if(isdigit(fen[index])){
@@ -46,12 +45,9 @@ void loadFEN(Board *board, char* fen){
 					piece = P_QUEEN;
 					break;
 			}
-			if(islower(fen[index])){
-				BBSet(board->blackPieces[piece], x, y);
-				piece |= MP_BLACK;
-			}else{
-				BBSet(board->whitePieces[piece], x, y);
-			}
+			if(islower(fen[index]))
+				piece += 6;
+			BBSet(board->bitboards[piece], x, y);
 			board->squares[x][y] = piece;
 			x++;
 			index++;
