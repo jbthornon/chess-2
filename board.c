@@ -47,7 +47,7 @@ void loadFEN(Board *board, char* fen){
 			}
 			if(islower(fen[index]))
 				piece += 6;
-			BBSet(board->bitboards[piece], x, y);
+			BBSet(board->bitboards[piece], boardIndex(x, y));
 			board->squares[boardIndex(x,y)] = piece;
 			x++;
 			index++;

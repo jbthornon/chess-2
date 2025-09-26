@@ -7,7 +7,7 @@ void printBB(u64 bb){
 	for(int y = 7; y>=0; y--){
 		printf("%c", '1'+y);
 		for(int x = 0; x<8; x++){
-			if(BBGet(bb, x, y))
+			if(BBGet(bb, boardIndex(x, y)))
 				printf("\x1b[42;30m");//background color green, fg color black
 			else
 				printf("\x1b[47;30m");//background color white, fg color black
@@ -28,7 +28,7 @@ void printBoard(Board *board, u64 highlighted){
 				printf("\x1b[42;30m");//background color green, fg color black
 			else
 				printf("\x1b[47;30m");//background color white, fg color black
-			if(BBGet(highlighted, x, y))
+			if(BBGet(highlighted, boardIndex(x, y)))
 				printf("\x1b[43;30m");
 
 			int piece = board->squares[boardIndex(x,y)];

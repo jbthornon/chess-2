@@ -29,7 +29,7 @@ typedef struct Board{
 */
 
 #define boardIndex(x,y) (((y)*8)+(x))
-#define BBGet(bb, x, y) ((bb)&((u64)1<<(((y)*8)+(x))))
-#define BBSet(bb, x, y) ((bb)|=((u64)1<<(((y)*8)+(x))))
+#define BBGet(bb, index) ((bb)&((u64)1<<(index)))
+#define BBSet(bb, index) ((bb)|=((u64)1<<(index)))
 
 void loadFEN(Board *board, char* fen);
