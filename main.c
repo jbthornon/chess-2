@@ -4,6 +4,7 @@
 
 #include "board.h"
 #include "move.h"
+#include "movegen.h"
 
 #include "print.h"
 
@@ -41,6 +42,16 @@ void cli(){
 			}
 		}
 
+		if(strcmp(&input[start], "tst") == 0){
+			MoveArray ma = generateMoves(&board);
+			for(int i = 0; i<ma.length; i++){
+				printMove(ma.moves[i]);
+			}
+			printf("size:%d\n", ma.size);
+			printf("len:%d\n", ma.length);
+			continue;
+		}
+
 		if(strcmp(&input[start], "exit") == 0){
 			quit = true;
 			continue;
@@ -62,7 +73,6 @@ void cli(){
 			makeMove(&board, move);
 			BBSet(highlighted, move.to);
 			BBSet(highlighted, move.from);
-			printMove(move);
 			continue;
 		}
 		printf("command unrecognised\n");

@@ -12,4 +12,6 @@ void makeMove(Board* board, Move move){
 	if(captured != P_EMPTY)
 		BBReset(board->bitboards[captured], move.to);
 	BBSet(board->bitboards[piece], move.to);
+	
+	board->turn = !board->turn;
 }

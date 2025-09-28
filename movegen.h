@@ -12,5 +12,5 @@ MoveArray moveArrayCreate();
 void moveArrayDestroy(MoveArray *ma);
 void moveArrayAppend(MoveArray *ma, Move move);
 
-// returns an array of all legal moves, numMoves is set to the length
+//returns an array of all legal moves
 MoveArray generateMoves(Board* board); 
