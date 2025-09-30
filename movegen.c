@@ -1,6 +1,8 @@
 #include <malloc.h>
 #include "movegen.h"
 #include "error.h"
+#include "print.h"
+static u64 knightDestinations[64];
 
 static const int index64[64] = {
     0,  1, 48,  2, 57, 49, 28,  3,
@@ -42,6 +44,32 @@ static u64 BBSignedShift(u64 x, int s){
 	return x>>(-s);
 }
 
+void generateMoveTables(){
+	const int knightOffsets[16] = {
+		 1, 2,
+		 1,-2,
+		-1, 2,
+		-1,-2,
+	
+		 2, 1,
+		 2,-1,
+		-2, 1,
+		-2,-1,
+	};
+	//knight move tables
+	for(int x = 0; x<8; x++){
+		for(int y = 0; y<8; y++){
+			int i = boardIndex(x,y);
+			knightDestinations[i] = (u64)0;
+			for(int j = 0; j<16; j+=2){
+				int dx = x +knightOffsets[j];
+				int dy = y +knightOffsets[j+1];
+				if(dx>=0 && dx<8 && dy>=0 && dy<8) BBSet(knightDestinations[i], boardIndex(dx, dy));
+			}
+		}
+	}
+}
+
 MoveArray moveArrayCreate(){
 	MoveArray ma;
 	ma.length = 0;
@@ -66,13 +94,40 @@ void moveArrayAppend(MoveArray* ma, Move move){
 }
 
 static void genPawnMoves(Board* board, MoveArray* ma);
+static void genKnightMoves(Board* board, MoveArray* ma);
 
 MoveArray generateMoves(Board* board){
 	MoveArray ma = moveArrayCreate();
 	genPawnMoves(board, &ma);
+	genKnightMoves(board, &ma);
 	return ma;
 }
 
+static void addMovesToDest(u64 destinations, int from, MoveArray* ma){
+	while(destinations){
+		int square = bitScanForward(destinations);
+		Move m = (Move){.to = square, .from = from};
+		moveArrayAppend(ma, m);
+		destinations &= destinations-1;//reset ls1b
+	}
+}
+
+static void genKnightMoves(Board* board, MoveArray* ma){
+	int color = (board->turn == 0)? 0 : 6;
+	u64 friendlyKnights = board->bitboards[P_KNIGHT+color];
+	
+	u64 friendly = 0;
+	for(int i = color; i<color+6; i++){
+		friendly |= board->bitboards[i];
+	}
+
+	while(friendlyKnights){
+		int i = bitScanForward(friendlyKnights);
+		friendlyKnights &= friendlyKnights-1;
+		u64 destinations = knightDestinations[i] & ~friendly;
+		addMovesToDest(destinations, i, ma);
+	}
+}
 
 //used inside genPawnMoves
 static void addPawnMoves(u64 destinations, int shift, MoveArray* ma){

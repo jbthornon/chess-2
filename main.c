@@ -80,6 +80,7 @@ void cli(){
 }
 
 int main(int argc, char* argv[]){
+	generateMoveTables();
 	cli();
 	return 0;
 }
