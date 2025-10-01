@@ -8,13 +8,14 @@
 
 #include "print.h"
 
-bool isMove(char* str){
-	// a-h 1-8 a-h 1-8 (eg d2d4)
+static bool isSquare(char* str){
 	if(str[0]<'a' || str[0]>'h') return false;
 	if(str[1]<'1' || str[1]>'8') return false;
-	if(str[2]<'a' || str[2]>'h') return false;
-	if(str[3]<'1' || str[3]>'8') return false;
 	return true;
+}
+static bool isMove(char* str){
+	if(isSquare(str) && isSquare(&str[2])) return true;
+	return false;
 }
 
 void cli(){
@@ -23,9 +24,15 @@ void cli(){
 
 	char input[100];
 	loadFEN(&board, fen);
+	board.turn = 0;
 	bool quit = false;
 	u64 highlighted = (u64)0;
+	MoveArray legalMoves = moveArrayCreate();
 	while(!quit){
+		moveArrayDestroy(&legalMoves);
+		legalMoves = generateMoves(&board);
+		if(board.turn == 1) printf("---blacks turn---\n");
+		else printf("---whites turn---\n");
 		printBoard(&board, highlighted);
 		highlighted = (u64)0;
 		printf(" :");
@@ -75,8 +82,18 @@ void cli(){
 			BBSet(highlighted, move.from);
 			continue;
 		}
+		
+		if(isSquare(&input[start])){
+			int from = boardIndex(input[start]-'a',input[start+1]-'1');
+			for(int i = 0; i<legalMoves.length; i++){
+				if(legalMoves.moves[i].from == from) BBSet(highlighted, legalMoves.moves[i].to);
+			}
+			continue;
+		}
+
 		printf("command unrecognised\n");
 	}
+	moveArrayDestroy(&legalMoves);
 }
 
 int main(int argc, char* argv[]){

@@ -26,6 +26,7 @@ static const int index64[64] = {
  * @precondition bb != 0
  * @return index (0..63) of least significant one bit
  */
+
 static int bitScanForward(u64 bb) {
 	if(bb == 0) error("Bitscan forward requires input not to be 0\n");
 	const u64 debruijn64 = (u64)(0x03f79d71b4cb0a89);
@@ -106,9 +107,9 @@ MoveArray generateMoves(Board* board){
 static void addMovesToDest(u64 destinations, int from, MoveArray* ma){
 	while(destinations){
 		int square = bitScanForward(destinations);
+		destinations &= destinations-1;//reset ls1b
 		Move m = (Move){.to = square, .from = from};
 		moveArrayAppend(ma, m);
-		destinations &= destinations-1;//reset ls1b
 	}
 }
 
@@ -133,9 +134,9 @@ static void genKnightMoves(Board* board, MoveArray* ma){
 static void addPawnMoves(u64 destinations, int shift, MoveArray* ma){
 	while(destinations){
 		int square = bitScanForward(destinations);
+		destinations &= destinations-1;//reset ls1b
 		Move m = (Move){.to = square, .from = square-shift};
 		moveArrayAppend(ma, m);
-		destinations &= destinations-1;//reset ls1b
 	}
 }
 
