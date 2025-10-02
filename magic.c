@@ -12,15 +12,23 @@ typedef struct MagicNum{
 MagicNum rookMagics[64];
 MagicNum bishopMagics[64];
 
-static bool testMagic(u64 magic, u64 occupancyMask){
-	return false;
-}
-
 static u64 generateBishopMask(int square){
 	u64 mask = 0;
-	int x = square%8;
-	int y = square/8;
-	return (FILE_A<<x) | (RANK_1<<(y*8));
+	int directions[8] = { -1,-1, -1,1, 1,-1, 1,1};
+	for(int d = 0; d<8; d+=2){
+		int dx = directions[d];
+		int dy = directions[d+1];
+		int x = square%8;
+		int y = square/8;
+		for(int i = 0; i<8; i++){
+			x+=dx;
+			y+=dy;
+			if((x+dx)<0 || (x+dx)>=8 || (y+dy)<0 || (y+dy)>=8)
+				break;
+			BBSet(mask, boardIndex(x,y));
+		}
+	}
+	return mask;
 }
 
 static u64 generateRookMask(int square){
@@ -38,6 +46,9 @@ static u64 generateRookMask(int square){
 	return mask;
 }
 
+static bool testMagic(u64 magic, u64 occupancyMask){
+	return false;
+}
 void magicSearch(){
 	for(int i = 0; i<64; i++){
 		u64 rookMask = generateRookMask(i);
@@ -45,7 +56,6 @@ void magicSearch(){
 		rookMagics[i].occupancyMask = rookMask;
 		bishopMagics[i].occupancyMask = bishopMask;
 		
-		printBB(rookMask);
 		//make random
 		u64 magic = 0;
 		testMagic(magic, rookMask);
