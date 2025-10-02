@@ -3,6 +3,7 @@
 #include "magic.h"
 #include "board.h"
 #include "print.h"
+#include "error.h"
 
 typedef struct MagicNum{
 	u64 magic;
@@ -46,19 +47,17 @@ static u64 generateRookMask(int square){
 	return mask;
 }
 
-static bool testMagic(u64 magic, u64 occupancyMask){
+//returns true if the magic number can fit a table in mem
+static bool testMagic(u64 magic, u64 occupancyMask, u64* mem, int memsize){
 	return false;
 }
+
 void magicSearch(){
 	for(int i = 0; i<64; i++){
 		u64 rookMask = generateRookMask(i);
 		u64 bishopMask = generateBishopMask(i);
 		rookMagics[i].occupancyMask = rookMask;
 		bishopMagics[i].occupancyMask = bishopMask;
-		
-		//make random
-		u64 magic = 0;
-		testMagic(magic, rookMask);
 	}	
 }
 

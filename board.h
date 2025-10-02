@@ -58,3 +58,6 @@ typedef struct Board{
 #define FILE_H ((u64)0x8080808080808080)
 
 void loadFEN(Board *board, char* fen);
+
+int bitScanForward(u64 bb);
+u64 BBSignedShift(u64 x, int s);
