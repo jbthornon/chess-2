@@ -8,6 +8,7 @@ static u64 knightDestinations[64];
 static u64 kingDestinations[64];
 static u64* rookDestinations[64];
 static u64* bishopDestinations[64];
+
 void generateMoveTables(){
 	const int knightOffsets[16] = {
 		 1, 2,
@@ -51,7 +52,8 @@ void generateMoveTables(){
 		}
 	}
 
-	loadMagics();
+	magicSearch();
+	fillMagicTables();
 }
 
 MoveArray moveArrayCreate(){

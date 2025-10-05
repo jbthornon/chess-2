@@ -5,8 +5,6 @@
 
 #include "magic.h"
 #include "board.h"
-#include "print.h"
-#include "error.h"
 
 typedef struct MagicData{
 	u64 number;
@@ -48,12 +46,13 @@ static u64 u64RandFewbits(){
 	return u64Rand()&u64Rand()&u64Rand();
 }
 
-static u64 generateBishopMask(int square){
+static u64 attackMask(int square, bool bishop){
 	u64 mask = 0;
-	int directions[8] = { -1,-1, -1,1, 1,-1, 1,1};
+	const int bishopDirections[8] =  { -1,-1, -1,1, 1,-1, 1,1};
+	const int rookDirections[8] =  { 1 ,0, -1,0, 0,1, 0,-1};
 	for(int d = 0; d<8; d+=2){
-		int dx = directions[d];
-		int dy = directions[d+1];
+		int dx = bishop ? bishopDirections[d] : rookDirections[d];
+		int dy = bishop ? bishopDirections[d+1] : rookDirections[d+1];
 		int x = square%8;
 		int y = square/8;
 		for(int i = 0; i<8; i++){
@@ -66,22 +65,6 @@ static u64 generateBishopMask(int square){
 	}
 	return mask;
 }
-
-static u64 generateRookMask(int square){
-	u64 mask = 0;
-	int x = square%8;
-	int y = square/8;
-	mask = (FILE_A<<x) | (RANK_1<<(y*8));
-	//reset the square the piece is on and the 4 squares on the edges of the board
-	BBReset(mask, boardIndex(x,y));
-
-	BBReset(mask, boardIndex(0,y));
-	BBReset(mask, boardIndex(7,y));
-	BBReset(mask, boardIndex(x,0));
-	BBReset(mask, boardIndex(x,7));
-	return mask;
-}
-
 
 static u64 blockersFromMask(u64 mask, int x){//x should be in the range 0-2^(num bits in mask)
 	u64 blockers = 0;
@@ -96,10 +79,9 @@ static u64 blockersFromMask(u64 mask, int x){//x should be in the range 0-2^(num
 }
 
 //return true if a valid magic was found that was better than the last one
-static bool tryRookMagic(int square, u64* testTable){
-	if(testTable == NULL) error("testTable is null\n");
+static bool tryMagic(int square, u64* testTable, bool bishop){
 	u64 magic = u64RandFewbits();
-	u64 mask = rookMagics[square].mask;
+	u64 mask = bishop ? bishopMagics[square].mask : rookMagics[square].mask;
 	int maxIndex = 0;
 	for(int i = 0; i<(1<<countBits(mask)); i++){
 		u64 blockers = blockersFromMask(mask, i);
@@ -108,62 +90,72 @@ static bool tryRookMagic(int square, u64* testTable){
 		testTable[tableIndex] = magic;
 		if(tableIndex>maxIndex) maxIndex = tableIndex;
 	}
-	rookMagics[square].number = magic;
-	rookMagics[square].maxIndex = maxIndex;
+	if(bishop){
+		bishopMagics[square].number = magic;
+		bishopMagics[square].maxIndex = maxIndex;
+	}else{
+		rookMagics[square].number = magic;
+		rookMagics[square].maxIndex = maxIndex;
+	}
 	return true;
 }
 
-static bool tryBishopMagic(int square, u64* testTable){
-	if(testTable == NULL) error("testTable is null\n");
-	u64 magic = u64RandFewbits();
-	u64 mask = bishopMagics[square].mask;
-	int maxIndex = 0;
-	for(int i = 0; i<(1<<countBits(mask)); i++){
-		u64 blockers = blockersFromMask(mask, i);
-		int tableIndex = (blockers*magic)>>(64-12);
-		if(testTable[tableIndex] == magic) return false;
-		testTable[tableIndex] = magic;
-		if(tableIndex>maxIndex) maxIndex = tableIndex;
+static void printMagics(){
+	printf("static MagicData rookMagics[64] = {\n");
+	for(int i = 0; i<64; i++){
+		printf(
+				"\t{.number = (u64)%lu, .mask = (u64)%lu, .maxIndex = %d},\n",//table start is set when table is filled
+				rookMagics[i].number,
+				rookMagics[i].mask,
+				rookMagics[i].maxIndex
+		);
 	}
-	bishopMagics[square].number = magic;
-	bishopMagics[square].maxIndex = maxIndex;
-	return true;
+
+	printf("static MagicData bishopMagics[64] = {\n");
+	for(int i = 0; i<64; i++){
+		printf(
+				"\t{.number = (u64)%lu, .mask = (u64)%lu, .maxIndex = %d},\n",
+				bishopMagics[i].number,
+				bishopMagics[i].mask,
+				bishopMagics[i].maxIndex
+		);
+	}
+
+	printf("};\n");
 }
 
 void magicSearch(){
 	srandom(time(0));
 	//init masks
 	for(int i = 0; i<64; i++){
-		rookMagics[i].mask = generateRookMask(i);
-		bishopMagics[i].mask = generateBishopMask(i);
+		rookMagics[i].mask = attackMask(i, false);
+		bishopMagics[i].mask = attackMask(i, true);
 	}
 	
 	u64* testTable = malloc(sizeof(u64)*(1<<12));
 	
 	int square = 0;
 	while(square<64){
-		if(tryRookMagic(square, testTable)){
-			printf("Rook magic %d found\n", square);
+		if(tryMagic(square, testTable, false))
 			square++;
-		}
 	}
 	
 	square = 0;
 	while(square<64){
-		if(tryBishopMagic(square, testTable)){
-			printf("Bishop magic %d found\n", square);
+		if(tryMagic(square, testTable, true))
 			square++;
-		}
 	}
 	free(testTable);
+	printMagics();
 }
 
-static u64 genRookDestinationsBitboard(int square, u64 blockers){
+static u64 destinationsBitboard(int square, u64 blockers, bool bishop){
 	u64 destinations = 0;
-	int directions[8] = {1,0, -1,0,  0,1, 0,-1, };
+	const int bishopDirections[8] =  { -1,-1, -1,1, 1,-1, 1,1};
+	const int rookDirections[8] =  { 1 ,0, -1,0, 0,1, 0,-1};
 	for(int d = 0; d<8; d+=2){
-		int dx = directions[d];
-		int dy = directions[d+1];
+		int dx = bishop ? bishopDirections[d] : rookDirections[d];
+		int dy = bishop ? bishopDirections[d+1] : rookDirections[d+1];
 		int x = square%8;
 		int y = square/8;
 		for(int i = 0; i<8; i++){
@@ -179,28 +171,7 @@ static u64 genRookDestinationsBitboard(int square, u64 blockers){
 	return destinations;
 }
 
-static u64 genBishopDestinationsBitboard(int square, u64 blockers){
-	u64 destinations = 0;
-	int directions[8] = { -1,-1, -1,1, 1,-1, 1,1};
-	for(int d = 0; d<8; d+=2){
-		int dx = directions[d];
-		int dy = directions[d+1];
-		int x = square%8;
-		int y = square/8;
-		for(int i = 0; i<8; i++){
-			x+=dx;
-			y+=dy;
-			if( (x)<0 || (x)>=8 || (y)<0 || (y)>=8)	
-				break;
-			BBSet(destinations, boardIndex(x,y));
-			if(BBGet(blockers, boardIndex(x,y)))
-				break;
-		}
-	}
-	return destinations;
-}
-
-static void genRookTable(){
+static void fillRookTable(){
 	int tableSize = 0;
 	for(int i = 0; i<64; i++){
 		rookMagics[i].tableStart = tableSize;
@@ -215,12 +186,12 @@ static void genRookTable(){
 			u64 blockers = blockersFromMask(rookMagics[square].mask, i);
 			u64 index = blockers*rookMagics[square].number;
 			index >>= 64-12;
-			rookTable[rookMagics[square].tableStart+index] = genRookDestinationsBitboard(square, blockers);
+			rookTable[rookMagics[square].tableStart+index] = destinationsBitboard(square, blockers, false);
 		}
 	}
 }
 
-static void genBishopTable(){
+static void fillBishopTable(){
 	int tableSize = 0;
 	for(int i = 0; i<64; i++){
 		bishopMagics[i].tableStart = tableSize;
@@ -235,20 +206,12 @@ static void genBishopTable(){
 			u64 blockers = blockersFromMask(bishopMagics[square].mask, i);
 			u64 index = blockers*bishopMagics[square].number;
 			index >>= 64-12;
-			bishopTable[bishopMagics[square].tableStart+index] = genBishopDestinationsBitboard(square, blockers);
+			bishopTable[bishopMagics[square].tableStart+index] = destinationsBitboard(square, blockers, true);
 		}
 	}
 }
 
-void loadMagics(){
-	magicSearch();
-	genRookTable();
-	genBishopTable();
-	int square = boardIndex(4,4);
-	u64 blockers = blockersFromMask(bishopMagics[square].mask, 0b110111111);
-	printBB(blockers);
-	u64 destinations = genBishopDestinationsBitboard(square, blockers);
-	printBB(destinations);
-	destinations = getBishopDestinations(square, blockers);
-	printBB(destinations);
+void fillMagicTables(){
+	fillRookTable();
+	fillBishopTable();
 }
