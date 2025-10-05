@@ -37,7 +37,7 @@ void generateMoveTables(){
 	for(int x = 0; x<8; x++){
 		for(int y = 0; y<8; y++){
 			int i = boardIndex(x,y);
-			knightDestinations[i] = (u64)0;
+			knightDestinations[i] = 0;
 			for(int j = 0; j<16; j+=2){
 				int dx = x +knightOffsets[j];
 				int dy = y +knightOffsets[j+1];
@@ -52,7 +52,6 @@ void generateMoveTables(){
 		}
 	}
 
-	magicSearch();
 	fillMagicTables();
 }
 
