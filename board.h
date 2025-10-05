@@ -59,5 +59,6 @@ typedef struct Board{
 
 void loadFEN(Board *board, char* fen);
 
-int bitScanForward(u64 bb);
+int bitScanForward(u64 x);
 u64 BBSignedShift(u64 x, int s);
+int countBits(u64 x);

@@ -96,3 +96,12 @@ u64 BBSignedShift(u64 x, int s){
 	if(s>0) return x<<s;
 	return x>>(-s);
 }
+
+int countBits(u64 x){
+	int count = 0;
+	while(x){
+		count++;
+		x&=x-1;//reset ls1b
+	}
+	return count;
+}
