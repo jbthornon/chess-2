@@ -82,6 +82,8 @@ static void genPawnMoves(Board* board, MoveArray* ma);
 static void genKnightMoves(Board* board, MoveArray* ma);
 static void genKingMoves(Board* board, MoveArray* ma);
 static void genRookMoves(Board* board, MoveArray* ma);
+static void genBishopMoves(Board* board, MoveArray* ma);
+static void genQueenMoves(Board* board, MoveArray* ma);
 
 void generateMoves(Board* board, MoveArray* ma){
 	board->color = board->turn? 6 : 0;
@@ -100,6 +102,8 @@ void generateMoves(Board* board, MoveArray* ma){
 	genKnightMoves(board, ma);
 	genKingMoves(board, ma);
 	genRookMoves(board, ma);
+	genBishopMoves(board, ma);
+	genQueenMoves(board, ma);
 }
 
 static void addMovesToDest(u64 destinations, int from, MoveArray* ma){
@@ -172,4 +176,24 @@ static void genRookMoves(Board* board, MoveArray* ma){
 		destinations &= ~board->friendlyPieces;
 		addMovesToDest(destinations, square, ma);
 	}
+}
+
+static void genBishopMoves(Board* board, MoveArray* ma){
+	u64 friendlyBishops = board->bitboards[P_BISHOP+board->color];
+
+	while(friendlyBishops){
+		int square = bitScanForward(friendlyBishops);
+		friendlyBishops &= friendlyBishops-1;
+		u64 destinations = getBishopDestinations(square, board->occupancy);
+		destinations &= ~board->friendlyPieces;
+		addMovesToDest(destinations, square, ma);
+	}
+}
+
+static void genQueenMoves(Board* board, MoveArray* ma){
+	int square = bitScanForward(board->bitboards[P_QUEEN+board->color]);
+	u64 destinations = getRookDestinations(square, board->occupancy);
+	destinations |= getBishopDestinations(square, board->occupancy);
+	destinations &= ~board->friendlyPieces;
+	addMovesToDest(destinations, square, ma);
 }
