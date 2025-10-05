@@ -21,6 +21,7 @@ typedef struct Board{
 	int squares[64];
 	u64 bitboards[12];
 	int turn; //0 for white, 1 for black
+	int enPassant; //target square for en passant, ignore if -1
 
 	//stuff for move generation
 	u64 friendlyPieces;

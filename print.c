@@ -56,6 +56,8 @@ void printBoard(Board *board, u64 highlighted){
 		printf("\n");
 	}
 	printf(" a b c d e f g h\n");
+	if(board->enPassant != -1)
+		printf("En Passant at %c%d \n", 'a'+(board->enPassant%8), 1+board->enPassant/8);
 }
 
 void printBoardDebug(Board *board){

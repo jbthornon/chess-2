@@ -53,7 +53,9 @@ void loadFEN(Board *board, char* fen){
 			x++;
 			index++;
 		}
-	}	
+	}
+	board->enPassant = -1;	
+	board->turn = 0;
 }
 
 static const int index64[64] = {

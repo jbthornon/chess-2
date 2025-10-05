@@ -139,13 +139,15 @@ static void genPawnMoves(Board* board, MoveArray* ma){
 	//double forward
 	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&homeRank, shift*2)&(~board->occupancy);
 	addPawnMoves(destinations, shift*2, ma);
-
+	
+	u64 targets = board->enemyPieces;
+	if(board->enPassant != -1) BBSet(targets, board->enPassant);
 	//left captures 
-	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&(~leftFile), shift-1)&(board->enemyPieces);
+	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&(~leftFile), shift-1)&targets;
 	addPawnMoves(destinations, shift-1, ma);
 
 	//right captures 
-	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&(~rightFile), shift+1)&(board->enemyPieces);
+	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&(~rightFile), shift+1)&targets;
 	addPawnMoves(destinations, shift+1, ma);
 }
 
