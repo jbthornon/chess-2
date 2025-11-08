@@ -144,7 +144,8 @@ void cli(){
 					move.promotion = P_EMPTY;
 					break;
 			}
-			printMove(move);
+			printMove(&board, move);
+			printf("\n");
 			makeMove(&board, move);
 			SET_BIT64(highlighted, move.to);
 			SET_BIT64(highlighted, move.from);
@@ -156,7 +157,8 @@ void cli(){
 			for(int i = 0; i<legalMoves.length; i++){
 				if(legalMoves.moves[i].from == from){
 					SET_BIT64(highlighted, legalMoves.moves[i].to);
-					printMove(legalMoves.moves[i]);
+					printMove(&board, legalMoves.moves[i]);
+					printf("\n");
 				}
 			}
 			continue;

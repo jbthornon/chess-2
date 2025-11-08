@@ -1,6 +1,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "board.h"
 #include "error.h"
@@ -69,7 +70,7 @@ void loadFEN(Board *board, char* fen){
 	if(fen[index] == 'w') board->whitesTurn = true;
 	else board->whitesTurn = false;
 	index++;
-
+	
 	index++;//skip ' '
 	
 	if(index>=(len-1)) error("loadFEN() fen is cut short or invalid");
@@ -84,7 +85,18 @@ void loadFEN(Board *board, char* fen){
 			index++;
 		}
 	}
+	index++;//skip ' '
+	
+	updatePerspectiveVariables(board);
+
 	if(index>=(len-1)) return; //accept strings that dont include half/full move counters
+	board->halfmoveClock = atoi(&fen[index]);
+	while(fen[index] != ' ') if(index++>=(len-1)) return;
+
+	index++;//skip ' '
+
+	if(index>=(len-1)) return;
+	board->fullmoveClock = atoi(&fen[index]);
 }
 
 void makeFen(Board *board, char* fen){
@@ -147,7 +159,7 @@ int bitScanForward(u64 bb) {
 		multiply the isolated ls1b with a 64 bit debruijn sequence to get an index to the index64 table
 		multiplying a number with a single bit set acts as a shift by the base 2 log of the number (0b1000*x is x<<4)
 		because every substring of a debrujin sequence is unique, each possible ls1b will result in a unique 6 bit sequence
-		in the last(most significant) 6 bits of the result, which can be used as in index in a lookup table
+		in the last(most significant) 6 bits of the result, which can be used as an index in a lookup table
 	*/
 	return index64[((bb & -bb) * debruijn64) >> 58];
 }

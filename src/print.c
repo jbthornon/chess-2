@@ -87,7 +87,11 @@ void printBoardDebug(Board *board){
 		printBoard(board, board->bitboards[i]);
 }
 
-void printMove(Move m){
-	if(m.promotion == P_PAWN) printf("%c%c%c%c\n", 'a' + (m.from%8), '1' + (m.from/8), 'a' + (m.to%8), '1' + (m.to/8));
-	else printf("%c%c%c%c%c\n", 'a' + (m.from%8), '1' + (m.from/8), 'a' + (m.to%8), '1' + (m.to/8), pieceToChar(m.promotion));
+void printMove(Board* board, Move m){
+	if(board->squares[m.from] == P_PAWN && m.promotion != P_EMPTY){
+		printf("%c%c%c%c%c", 'a' + (m.from%8), '1' + (m.from/8), 'a' + (m.to%8), '1' + (m.to/8), pieceToChar(m.promotion));
+	}
+	else{
+		printf("%c%c%c%c", 'a' + (m.from%8), '1' + (m.from/8), 'a' + (m.to%8), '1' + (m.to/8));
+	}
 }
