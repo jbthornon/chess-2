@@ -1,5 +1,5 @@
 CC:=clang
-CARGS:=
+CARGS:=-O3
 BINNAME=main
 SRC:= $(wildcard src/*.c)
 
