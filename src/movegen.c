@@ -135,8 +135,6 @@ static void addPawnMoves(u64 promoRank, u64 destinations, int shift, MoveArray* 
 static void genPawnMoves(Board* board, MoveArray* ma){
 	int shift    = (board->whitesTurn)? 8 : -8;
 	u64 homeRank = (board->whitesTurn)? RANK_2 : RANK_7;
-	u64 leftFile = (board->whitesTurn)? FILE_A : FILE_H;
-	u64 rightFile = (board->whitesTurn)? FILE_H : FILE_A;
 	u64 promoRank = (board->whitesTurn)? RANK_8 : RANK_1;
 
 	//forward
@@ -157,13 +155,14 @@ static void genPawnMoves(Board* board, MoveArray* ma){
 	
 	u64 targets = board->enemyPieces;
 	if(board->enPassant != -1) SET_BIT64(targets, board->enPassant);
-	//left captures 
-	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&(~leftFile), shift-1)&targets;
-	addPawnMoves(promoRank, destinations, shift-1, ma);
 
-	//right captures 
-	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&(~rightFile), shift+1)&targets;
+
+	//captures 
+	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&(~FILE_H), shift+1)&targets;
 	addPawnMoves(promoRank, destinations, shift+1, ma);
+
+	destinations = BBSignedShift(board->bitboards[P_PAWN+board->color]&(~FILE_A), shift-1)&targets;
+	addPawnMoves(promoRank, destinations, shift-1, ma);
 }
 
 static void genKnightMoves(Board* board, MoveArray* ma){
