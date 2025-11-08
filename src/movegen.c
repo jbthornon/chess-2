@@ -229,6 +229,8 @@ static void genCastlingMoves(Board* board, MoveArray* ma){
 				canCastle = false;
 				break;
 			}
+		}
+		for(int s = kingSquare; s>=kingSquare-2; s--){
 			if(squareThreatenedBy(board, s, board->enemyColor)){
 				canCastle = false;
 				break;
@@ -250,6 +252,9 @@ static void genCastlingMoves(Board* board, MoveArray* ma){
 				canCastle = false;
 				break;
 			}
+
+		}
+		for(int s = kingSquare; s<=kingSquare+2; s++){
 			if(squareThreatenedBy(board, s, board->enemyColor)){
 				canCastle = false;
 				break;
