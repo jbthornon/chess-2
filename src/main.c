@@ -76,6 +76,8 @@ void cli(){
 					" index - print board indices\n"
 					" fen - print board fen\n"
 					" load - load board from fen\n"
+					" perft - perft from current position\n"
+					" test - perft from preset positions\n"
 					" <square><square><promotion> - make a move (eg b1c3)\n"
 					" <square> - show legal moves from a square (eg b1)\n"
 					" press enter to continue\n"
@@ -106,7 +108,30 @@ void cli(){
 			int depth = atoi(input);
 			char fen[MAX_FEN_SIZE];
 			makeFen(&board, fen);
-			perft(fen, depth, 0);
+			perft(fen, depth, 0, true);
+			continue;
+		}
+
+		if(strcmp(&input[start], "test") == 0){
+			char positions[][MAX_FEN_SIZE] = {
+				STARTPOS_FEN,
+				STARTPOS_FEN,
+				STARTPOS_FEN,
+				"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - "
+			};
+			int results[] = {
+				8902,
+				197281,
+				4865609,
+			 	4085603,	
+			};
+			int depths[] = {
+				3,4,5,4
+			};
+			for(int i = 0; i<4; i++){
+				printf("%d) ", i);
+				perft(positions[i], depths[i], results[i], false);
+			}
 			continue;
 		}
 
