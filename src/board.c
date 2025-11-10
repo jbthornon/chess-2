@@ -58,7 +58,7 @@ void loadFEN(Board *board, char* fen){
 		board->bitboards[i] = (u64)0;
 	}
 	for(int i = 0; i<64; i++) board->squares[i] = P_EMPTY;
-	for(int i = 0; i<4; i++) board->canCastle[0] = false;
+	for(int i = 0; i<4; i++) board->canCastle[i] = false;
 	board->halfmoveClock = 0;
 	board->fullmoveClock = 0;
 	board->enPassant = -1;
@@ -95,7 +95,8 @@ void loadFEN(Board *board, char* fen){
 	if(fen[index] == '-'){
 		index++;
 	}else{
-		while(fen[index] != ' '){
+		for(int i = 0; i<4; i++){
+			if(fen[index] == ' ') break;
 			if(fen[index] == 'K') board->canCastle[0] = true;
 			if(fen[index] == 'Q') board->canCastle[1] = true;
 			if(fen[index] == 'k') board->canCastle[2] = true;
@@ -115,7 +116,7 @@ void loadFEN(Board *board, char* fen){
 	index++;//skip ' '
 
 	updatePerspectiveVariables(board);
-	
+
 	//half/full move counters
 	if(index>=(len-1)) return; //accept strings that dont include half/full move counters
 	board->halfmoveClock = atoi(&fen[index]);
