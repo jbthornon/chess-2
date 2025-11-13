@@ -8,6 +8,7 @@
 #include "movegen.h"
 #include "search.h"
 #include "print.h"
+#include "eval.h"
 
 #include "magic.h"
 
@@ -63,6 +64,7 @@ void cli(){
 					" load - load board from fen\n"
 					" perft - perft from current position\n"
 					" test - perft from preset positions\n"
+					" eval - eval of current position\n"
 					" <square><square><promotion> - make a move (eg b1c3)\n"
 					" <square> - show legal moves from a square (eg b1)\n"
 					" press enter to continue\n"
@@ -141,6 +143,11 @@ void cli(){
 			continue;
 		}
 
+		if(strcmp(&input[start], "eval") == 0){
+			printf(" %d\n", evaluate(&board));
+			continue;
+		}
+
 		if(isMove(&input[start])){
 			Move move;
 			move.from = squareToIndex(&input[start]);
@@ -148,19 +155,16 @@ void cli(){
 			move.type = M_NORMAL;
 			switch(tolower(input[start+4])){
 				case 'n':
-					move.type = P_KNIGHT;
+					move.type = M_PROMO_KNIGHT;
 					break;
 				case 'r':
-					move.type = P_ROOK;
+					move.type = M_PROMO_ROOK;
 					break;
 				case 'b':
-					move.type = P_BISHOP;
+					move.type = M_PROMO_BISHOP;
 					break;
 				case 'q':
-					move.type = P_QUEEN;
-					break;
-				default:
-					move.type = P_EMPTY;
+					move.type = M_PROMO_QUEEN;
 					break;
 			}
 			printMove(&board, move);
