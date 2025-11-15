@@ -1,6 +1,8 @@
 #include "movegen.h"
 #include "print.h"
 #include "magic.h"
+#include "error.h"
+#include <stdio.h>
 
 static u64 knightDestinations[64];
 static u64 kingDestinations[64];
@@ -177,6 +179,10 @@ static void genKnightMoves(Board* board, MoveArray* ma){
 }
 
 static void genKingMoves(Board* board, MoveArray* ma){
+	if(board->bitboards[P_KING+board->color] == 0) {
+		printBoard(board, 0);
+		error("NO KING AAAAH!!!\n");
+	}
 	int i = bitScanForward(board->bitboards[P_KING+board->color]);
 	u64 destinations = kingDestinations[i] & ~board->friendlyPieces;
 	addMovesToDest(destinations, i, ma);

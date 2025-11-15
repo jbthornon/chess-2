@@ -87,7 +87,7 @@ void printBoardDebug(Board *board){
 		printBoard(board, board->bitboards[i]);
 }
 
-void printMove(Board* board, Move m){
+void printMove(Move m){
 	if(moveIsPromo(m))
 		printf("%c%c%c%c%c", 'a' + (m.from%8), '1' + (m.from/8), 'a' + (m.to%8), '1' + (m.to/8), pieceToChar(m.type));
 	else

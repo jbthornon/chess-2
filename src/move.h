@@ -17,5 +17,17 @@ typedef struct Move{
 	enum MOVE_TYPE type;
 }Move;
 
+typedef struct Unmove{
+	//to and from refer to the to and from of the original move
+	int to;
+	int from;
+	int captured;
+	int capturedSquare;
+	char castlingRights;
+	int enPassant;	
+	enum MOVE_TYPE type;
+}Unmove;
+
 bool moveIsPromo(Move move);
-void makeMove(Board* board, Move move);
+Unmove makeMove(Board* board, Move move);
+void unmakeMove(Board* board, Unmove unmove);

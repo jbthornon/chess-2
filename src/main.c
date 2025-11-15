@@ -26,6 +26,7 @@ void cli(){
 	u64 highlighted = (u64)0;
 	MoveArray legalMoves;
 	legalMoves.length = 0;
+	Unmove unmove;
 	while(!quit){
 		legalMoves.length = 0;//clear array
 		generateMoves(&board, &legalMoves);
@@ -148,6 +149,16 @@ void cli(){
 			continue;
 		}
 
+		if(strcmp(&input[start], "undo") == 0){
+			unmakeMove(&board, unmove);
+			continue;
+		}
+
+		if(strcmp(&input[start], "debug") == 0){
+			printBoardDebug(&board);
+			continue;
+		}
+
 		if(isMove(&input[start])){
 			Move move;
 			move.from = squareToIndex(&input[start]);
@@ -167,9 +178,14 @@ void cli(){
 					move.type = M_PROMO_QUEEN;
 					break;
 			}
-			printMove(&board, move);
+			if(board.squares[move.from] == P_KING){
+				if(move.to-move.from == -2 || move.to-move.from == 2){
+					move.type = M_CASTLE;
+				}
+			}
+			printMove(move);
 			printf("\n");
-			makeMove(&board, move);
+			unmove = makeMove(&board, move);
 			SET_BIT64(highlighted, move.to);
 			SET_BIT64(highlighted, move.from);
 			continue;
@@ -180,7 +196,7 @@ void cli(){
 			for(int i = 0; i<legalMoves.length; i++){
 				if(legalMoves.moves[i].from == from){
 					SET_BIT64(highlighted, legalMoves.moves[i].to);
-					printMove(&board, legalMoves.moves[i]);
+					printMove(legalMoves.moves[i]);
 					printf("\n");
 				}
 			}

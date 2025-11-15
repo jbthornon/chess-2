@@ -7,7 +7,6 @@
 static void movePiece(Board* board, int from, int to){
 	int piece = board->squares[from];
 	int captured = board->squares[to];
-
 	//update square-centric board
 	board->squares[to] = piece;
 	board->squares[from] = P_EMPTY;
@@ -23,19 +22,28 @@ bool moveIsPromo(Move move){
 	return (move.type != M_NORMAL && move.type != M_CASTLE);
 }
 
-void makeMove(Board* board, Move move){
+Unmove makeMove(Board* board, Move move){
 	int piece = board->squares[move.from];
 	int captured = board->squares[move.to];
 	int pieceType = piece-(board->color);
 	int capturedType = captured-(board->enemyColor);
+	Unmove unmove;
+	unmove.to = move.to;
+	unmove.from = move.from;
+	unmove.captured = captured;
+	unmove.capturedSquare = move.to;
+	unmove.enPassant = board->enPassant;
+	unmove.castlingRights = board->castlingRights;
+	unmove.type = move.type;
+	
 	movePiece(board, move.from, move.to);
 	
 	//Promotion
 	if(moveIsPromo(move)){
-		int promotion = move.type;//M_PROMO_QUEEN == P_QUEEN ect
-		board->squares[move.to] = promotion+board->color;
+		int promotion = move.type+board->color;//M_PROMO_QUEEN == P_QUEEN ect
+		board->squares[move.to] = promotion;
 		RESET_BIT64(board->bitboards[piece], move.to);
-		SET_BIT64(board->bitboards[promotion+board->color], move.to);
+		SET_BIT64(board->bitboards[promotion], move.to);
 	}
 	
 	//Castling
@@ -63,6 +71,8 @@ void makeMove(Board* board, Move move){
 		if(move.to>32)
 			capturedSquare = move.to-8;
 		captured = board->squares[capturedSquare];
+		unmove.captured = captured;
+		unmove.capturedSquare = capturedSquare;
 		board->squares[capturedSquare] = P_EMPTY;
 		RESET_BIT64(board->bitboards[captured], capturedSquare);
 	}
@@ -121,4 +131,46 @@ void makeMove(Board* board, Move move){
 	
 	board->whitesTurn = !board->whitesTurn;
 	updatePerspectiveVariables(board);
+	return unmove;
+}
+
+
+void unmakeMove(Board* board, Unmove unmove){
+	//restore board state
+	board->enPassant = unmove.enPassant;
+	board->castlingRights = unmove.castlingRights;
+	board->whitesTurn = !board->whitesTurn;
+	updatePerspectiveVariables(board);
+
+	//move pieces back
+	movePiece(board, unmove.to, unmove.from);
+
+	//undo capture/en passant
+	if(unmove.captured != P_EMPTY){
+		board->squares[unmove.capturedSquare] = unmove.captured;
+		SET_BIT64(board->bitboards[unmove.captured], unmove.capturedSquare);
+	}
+	
+	if(unmove.type == M_CASTLE){
+		//move rook back
+		if(unmove.to == 62)//g8
+			movePiece(board, 61, 63);//f8->h8
+
+		if(unmove.to == 58)//c8
+			movePiece(board, 59, 56);//d8->a8
+
+		if(unmove.to == 6)//g1
+			movePiece(board, 5, 7);//f1->h1
+
+		if(unmove.to == 2)//c1
+			movePiece(board, 3, 0);//d1->a1	
+	}
+
+	//promotion
+	if(unmove.type != M_NORMAL && unmove.type != M_CASTLE){
+		int piece = board->squares[unmove.from];
+		board->squares[unmove.from] = P_PAWN+board->color;
+		RESET_BIT64(board->bitboards[piece], unmove.from);
+		SET_BIT64(board->bitboards[P_PAWN+board->color], unmove.from);
+	}
 }
