@@ -2,10 +2,63 @@
 #include <stdio.h>
 
 #include "search.h"
+#include "eval.h"
 #include "print.h"
 
-static int perftSearch(Board* board, int depth);
+static int nmax(Board *board, int depth);
+Move search(Board board, int depth){
+	Move bestMove;
+	int bestEval = 0;
+	bool moveFound = false;
+	MoveArray legalMoves;
+	generateMoves(&board, &legalMoves);
+	for(int i = 0; i<legalMoves.length; i++){
+		Unmove unmove = makeMove(&board, legalMoves.moves[i]);
+		int kingSquare = bitScanForward(board.bitboards[P_KING+board.enemyColor]);//colors swapped after makeMove
+		if(squareThreatenedBy(&board, kingSquare, board.color)){
+			unmakeMove(&board, unmove);
+			continue;
+		}
+		int eval = nmax(&board, depth-1);
+		unmakeMove(&board, unmove);
+		if(eval>bestEval || !moveFound){
+			bestEval = eval;
+			bestMove = legalMoves.moves[i];
+		}
+		moveFound = true;
+	}
+	return bestMove;
+}
 
+
+static int nmax(Board *board, int depth){
+	if(depth <= 0) return -evaluate(board);
+	int bestEval = 0;
+	bool moveFound = false;
+	MoveArray legalMoves;
+	generateMoves(board, &legalMoves);
+	for(int i = 0; i<legalMoves.length; i++){
+		Unmove unmove = makeMove(board, legalMoves.moves[i]);
+		int kingSquare = bitScanForward(board->bitboards[P_KING+board->enemyColor]);//colors swapped after makeMove
+		if(squareThreatenedBy(board, kingSquare, board->color)){
+			unmakeMove(board, unmove);
+			continue;
+		}
+		int eval = nmax(board, depth-1);
+		unmakeMove(board, unmove);
+	
+		if(eval>bestEval || !moveFound){
+			bestEval = eval;
+		}
+		moveFound = true;
+	}
+	//return -eval because nmax() is evaluating how good a move is for the other player
+	if(!moveFound)//checkmate
+		return -LOSS_EVAL;
+	return -bestEval;
+}
+
+static int perftSearch(Board* board, int depth);
 float perft(char* fen, int depth, int expected, bool divided){
 	Board board;
 	loadFEN(&board, fen);

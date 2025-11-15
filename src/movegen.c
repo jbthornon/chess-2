@@ -89,6 +89,7 @@ static void genQueenMoves(Board* board, MoveArray* ma);
 static void genCastlingMoves(Board* board, MoveArray* ma);
 
 void generateMoves(Board* board, MoveArray* ma){
+	ma->length = 0;
 	genPawnMoves(board, ma);
 	genKnightMoves(board, ma);
 	genKingMoves(board, ma);

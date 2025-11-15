@@ -174,7 +174,14 @@ void cli(){
 			refineMagics(iter);
 			continue;
 		}
-		
+
+		if(strcmp(&input[start], "search") == 0){
+			getInput(" depth:", input, 100);
+			int depth = atoi(input);
+			printMove(search(board, depth));
+			continue;
+		}
+
 		if(isMove(&input[start])){
 			Move move;
 			move.from = squareToIndex(&input[start]);
